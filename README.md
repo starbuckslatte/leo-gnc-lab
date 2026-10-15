@@ -76,7 +76,7 @@ eop = struct('dut1', 0.08, 'xp', 0, 'yp', 0);        % EOP (rad for xp, yp)
 
 ### v1.0 — Core attitude GNC
 - [x] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF IAU-76/FK5, LVLH) ✅, time systems (UTC/UT1/TT/GPS) ✅, unit tests ✅, buildtool verification ✅
-- [ ] **Phase 2 – Environment & dynamics:** orbit propagation (two-body, EGM2008 spherical harmonics, RK4) ✅, atmosphere (NRLMSISE-00) ✅, magnetic field (IGRF-14) ✅, Sun/eclipse (DE405, conical shadow) ✅, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques ✅; disturbance-vs-altitude study
+- [ ] **Phase 2 – Environment & dynamics:** orbit propagation (two-body, EGM2008 spherical harmonics, RK4) ✅, atmosphere (NRLMSISE-00) ✅, magnetic field (IGRF-14) ✅, Sun/eclipse (DE405, conical shadow) ✅, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques ✅; disturbance-vs-altitude study ✅ (`scripts/study_disturbance_vs_altitude.m`, [figure](results/disturbance_vs_altitude.png))
 - [ ] **Phase 3 – Sensors & actuators:** Farrenkopf gyro, star tracker, sun sensor, magnetometer, GNSS; reaction wheels (saturation, friction), magnetorquers, thrusters
 - [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo
 - [ ] **Phase 5 – Attitude guidance & control:** B-dot detumble, quaternion feedback, nadir / target pointing, large-angle slews, momentum unloading
