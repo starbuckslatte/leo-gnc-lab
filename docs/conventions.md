@@ -92,3 +92,10 @@ EOP are passed as a struct `eop` with fields `dut1` [s], `xp`, `yp` [rad], `lod`
 **Known difference from EGSE:** `rot_mtx.m` passes a Julian date to `omega_lunar`, which expects Julian centuries. This only changes the two small equation-of-equinoxes terms, by at most 0.0027″ (9 cm at 7000 km; measured 7e-10 rad = 3.5 mm on 2026-10-15). `frames.fk5` uses centuries of TT.
 
 **LVLH:** `frames.eciToLvlh` returns $A_{ECI\to LVLH}$ and the matching quaternion, the same as EGSE `PVi2Qi2l`.
+
+## Orbit propagation (`+orbit`)
+
+- State $x = [\mathbf{r};\,\mathbf{v}]$ in ECI (J2000), SI units; time as seconds since a UTC Julian date `jd0`.
+- Gravity: `degree = 0` is two-body with EGM2008 GM $= 3.986004415\times10^{14}$ m³/s². `degree ≥ 2` uses Aerospace Toolbox `gravitysphericalharmonic` (EGM2008, degree = order), evaluated in ECEF and rotated back with `frames.fk5`.
+- Integrator: fixed-step classical RK4 (`orbit.rk4Step`). Against `ode113` (RelTol 1e-12) with EGM2008 degree 6 at 500 km, the position difference after one orbit is 0.3 mm (dt = 1 s), 0.7 mm (dt = 5 s) and 1.6 cm (dt = 10 s).
+- Cost: about 0.5–1 ms per acceleration evaluation, mostly inside `gravitysphericalharmonic`; one day at dt = 5 s with degree 6 takes about 20 s.
