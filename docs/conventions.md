@@ -110,3 +110,16 @@ All functions take an ECI position [m] and a UTC Julian date and return ECI vect
 | `env.shadowFraction` | Conical Earth shadow, disk overlap | 1 sunlit, 0 umbra; Montenbruck & Gill 3.4.2 |
 | `env.magneticField` | IGRF-14 (`igrfmagm`) | Returned in tesla |
 | `env.atmosphereDensity` | NRLMSISE-00 (`atmosnrlmsise00`) | `sw` struct: `f107`, `f107a`, `ap` |
+
+## Disturbance torques (`+torque`)
+
+All torques are in the body frame [N m]; `q` is the ECI→body quaternion.
+
+| Function | Model |
+|---|---|
+| `torque.gravityGradient` | $\boldsymbol{\tau} = \frac{3\mu}{r^5}\,\mathbf{r}_b \times J\,\mathbf{r}_b$ |
+| `torque.aerodynamic` | Flat plate, $\mathbf{F} = -\tfrac12\rho C_d A\,\lVert\mathbf{v}_{rel}\rVert\,\mathbf{v}_{rel}$, $\mathbf{v}_{rel} = \mathbf{v} - \boldsymbol{\omega}_\oplus \times \mathbf{r}$ |
+| `torque.solarRadiation` | Flat plate facing the Sun, $\mathbf{F} = -P\,(AU/d)^2\,\nu\,C_r A\,\hat{\mathbf{s}}$, $P = 4.56\times10^{-6}$ N/m² |
+| `torque.magnetic` | $\boldsymbol{\tau} = \mathbf{m} \times \mathbf{B}_b$ |
+
+Aerodynamic and SRP torques use $\boldsymbol{\tau} = \mathbf{c}_p \times \mathbf{F}$ with the single `sc.cpOffset` (centre of pressure − CoM) from the mission file. Area does not change with attitude; a multi-plate model can replace this later.
