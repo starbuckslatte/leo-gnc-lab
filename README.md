@@ -2,7 +2,7 @@
 
 A modular MATLAB/Simulink sandbox for spacecraft **Guidance, Navigation & Control (GNC)** in **LEO and VLEO**, built step by step from first principles: environment and dynamics, sensor models, attitude and orbit estimation, closed-loop control, mode management with FDIR, and optical navigation.
 
-> **Status:** Phase 1 (foundations) in progress.
+> **Status:** Phase 1 (foundations) complete — release `v0.1.0`.
 
 ## Design principles
 
@@ -46,12 +46,12 @@ runAllTests           % run the full unit test suite
 demo_phase1_quaternion
 ```
 
-### Local CI
+### Verification and releases
 
-`buildfile.m` defines the CI: a static code check (`check`) and the full test suite (`test`). Run it with `buildtool` in MATLAB. A versioned `pre-push` hook runs the same build before every `git push` and blocks the push on failure. Enable it once per clone:
+`buildfile.m` defines a static code check (`check`) and the full test suite (`test`). Run both with `buildtool` in MATLAB before tagging a release. Every tagged release (`v0.1.0`, …) is a state in which all tests pass. If a later change turns a test red, compare against or restore from the last tag:
 
 ```bash
-git config core.hooksPath .githooks
+git diff v0.1.0 -- src/
 ```
 
 Quaternion functions are called through their namespace, e.g.:
@@ -75,7 +75,7 @@ eop = struct('dut1', 0.08, 'xp', 0, 'yp', 0);        % EOP (rad for xp, yp)
 ## Roadmap
 
 ### v1.0 — Core attitude GNC
-- [ ] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF IAU-76/FK5, LVLH) ✅, time systems (UTC/UT1/TT/GPS) ✅, unit tests ✅, local CI (buildtool + pre-push hook) ✅
+- [x] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF IAU-76/FK5, LVLH) ✅, time systems (UTC/UT1/TT/GPS) ✅, unit tests ✅, buildtool verification ✅
 - [ ] **Phase 2 – Environment & dynamics:** orbit propagation (two-body, J2, spherical harmonics), atmosphere, magnetic field, Sun/eclipse, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques; disturbance-vs-altitude study
 - [ ] **Phase 3 – Sensors & actuators:** Farrenkopf gyro, star tracker, sun sensor, magnetometer, GNSS; reaction wheels (saturation, friction), magnetorquers, thrusters
 - [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo

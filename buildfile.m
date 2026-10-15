@@ -1,8 +1,7 @@
 function plan = buildfile
-%BUILDFILE Local CI: static code check, then the full test suite.
+%BUILDFILE Static code check, then the full test suite.
 %   buildtool            run default tasks (check, test)
 %   buildtool test       run tests only
-%   Also run automatically by .githooks/pre-push before every git push.
 import matlab.buildtool.tasks.CodeIssuesTask
 import matlab.buildtool.tasks.TestTask
 

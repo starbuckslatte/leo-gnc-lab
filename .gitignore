@@ -25,4 +25,3 @@ desktop.ini
 # buildtool outputs
 results/test-results.xml
 .buildtool/
-results/.build-ok
