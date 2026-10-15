@@ -109,4 +109,10 @@ m.fsw.rate = 10;                                       % Hz, main control loop
 m.sim.dt       = 0.01;                                 % s, truth integration step
 m.sim.duration = 5400;                                 % s (~1 orbit)
 m.sim.seed     = 1;                                    % RNG seed for reproducibility
+m.sim.orbitDt  = 1;                                    % s, orbit + environment update step
+m.sim.q0       = [];                                   % initial ECI->body quaternion ([] = LVLH)
+m.sim.w0       = deg2rad([0.5; -0.3; 0.2]);            % rad/s, initial body rate (illustrative tip-off)
+m.sim.rwH0     = zeros(4, 1);                          % N m s, initial wheel momenta
+m.sim.disturbances = struct('gravityGradient', true, 'aero', true, ...
+                            'srp', true, 'magnetic', true);
 end

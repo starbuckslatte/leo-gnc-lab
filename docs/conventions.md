@@ -160,3 +160,21 @@ J\dot{\boldsymbol\omega} = \boldsymbol\tau - G\dot{\mathbf{h}} - \boldsymbol\ome
 $$
 
 $J$ is the whole-spacecraft inertia including the wheels. Friction uses wheel speed $h/I_w$, neglecting the body-rate contribution.
+
+## Closed-loop simulation (`+sim`)
+
+`out = sim.run(m, fsw)` runs truth, sensors, flight software and actuators together.
+
+| Item | Rate | Notes |
+|---|---|---|
+| Attitude truth (with wheels) | `m.sim.dt` | RK4; external torque and wheel command held over `dt` |
+| Orbit + environment | `m.sim.orbitDt` | Sun, shadow, field, density and r, v held between updates |
+| Each sensor | its own `rate` | Sampled from the truth at that tick |
+| FSW | `m.fsw.rate` | Commands held until the next FSW step; `[]` keeps the previous command |
+
+- Every period must be an integer multiple of `m.sim.dt` (otherwise `sim:run:rate` error). Events use integer tick counters, so rates never drift.
+- Order within a tick: environment update → sensor sampling → FSW → actuators → orbit and attitude steps. A command issued at a tick acts from that tick.
+- A delayed sensor (`delaySteps`) is tagged with its delivery time, not its acquisition time: the FSW is not told about the latency.
+- Thrust enters the orbit with the value at the start of each orbit step. For burns shorter than `orbitDt`, set `orbitDt = 1/m.fsw.rate`.
+- FSW interface: `state = fsw.init(m)`, `[cmd, state] = fsw.step(state, meas, t)`; see `sim.nullFsw`.
+- Speed: about 55× real time for the mission template (one orbit in about 100 s).
