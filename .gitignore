@@ -1,0 +1,23 @@
+# --- MATLAB ---
+*.asv
+*.m~
+*.autosave
+*.mex*
+*.slxc
+*.smv
+slprj/
+sccprj/
+codegen/
+octave-workspace
+
+# Large / generated outputs (keep only curated figures under results/)
+results/**/*.mat
+results/**/*.fig
+*.log
+
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
