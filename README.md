@@ -2,7 +2,7 @@
 
 A modular MATLAB/Simulink sandbox for spacecraft **Guidance, Navigation & Control (GNC)** in **LEO and VLEO**, built step by step from first principles: environment and dynamics, sensor models, attitude and orbit estimation, closed-loop control, mode management with FDIR, and optical navigation.
 
-> **Status:** Phase 3 (sensors & actuators) and the simulation runner complete.
+> **Status:** Phase 4 (attitude determination) complete.
 
 ## Design principles
 
@@ -79,7 +79,7 @@ eop = struct('dut1', 0.08, 'xp', 0, 'yp', 0);        % EOP (rad for xp, yp)
 - [x] **Phase 2 – Environment & dynamics:** rigid-body attitude dynamics (Euler, RK4) ✅, orbit propagation (two-body, EGM2008 spherical harmonics, RK4) ✅, atmosphere (NRLMSISE-00) ✅, magnetic field (IGRF-14) ✅, Sun/eclipse (DE405, conical shadow) ✅, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques ✅; disturbance-vs-altitude study ✅ (`scripts/study_disturbance_vs_altitude.m`, [figure](results/disturbance_vs_altitude.png))
 - [x] **Phase 3 – Sensors & actuators:** Farrenkopf gyro ✅, star tracker ✅, sun sensor ✅, magnetometer ✅, GNSS ✅; reaction wheels (saturation, friction, body coupling) ✅, magnetorquers ✅, thrusters ✅; switchable delay / quantization ✅
 - [x] **Simulation runner:** multi-rate closed loop (`sim.run`) with integer-tick scheduling, FSW interface, open-loop demo (`scripts/demo_open_loop.m`) ✅
-- [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo
+- [x] **Phase 4 – Attitude determination:** MEKF (gyro + star tracker) ✅ with ±3σ consistency ✅, NEES ✅, Monte Carlo ✅ (`scripts/study_mekf_monte_carlo.m`, [figure](results/mekf_monte_carlo.png))
 - [ ] **Phase 5 – Attitude guidance & control:** B-dot detumble, quaternion feedback, nadir / target pointing, large-angle slews, momentum unloading
 
 ### v2.0 — Navigation, VLEO, autonomy

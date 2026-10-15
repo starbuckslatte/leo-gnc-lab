@@ -178,3 +178,13 @@ $J$ is the whole-spacecraft inertia including the wheels. Friction uses wheel sp
 - Thrust enters the orbit with the value at the start of each orbit step. For burns shorter than `orbitDt`, set `orbitDt = 1/m.fsw.rate`.
 - FSW interface: `state = fsw.init(m)`, `[cmd, state] = fsw.step(state, meas, t)`; see `sim.nullFsw`.
 - Speed: about 55× real time for the mission template (one orbit in about 100 s).
+
+## Attitude estimation (`+mekf`, flight software)
+
+Multiplicative EKF with error state $[\delta\boldsymbol\theta;\,\Delta\boldsymbol\beta]$ (body frame), $q_{true} = \hat{q} \otimes \delta q(\delta\boldsymbol\theta)$.
+
+- **Propagation** (each gyro sample): $\hat{q} \leftarrow \hat{q} \otimes \exp\big((\tilde{\boldsymbol\omega} - \hat{\boldsymbol\beta})\Delta t\big)$, $\Phi = e^{F\Delta t}$ with $F = \begin{bmatrix} -[\hat{\boldsymbol\omega}\times] & -I \ 0 & 0 \end{bmatrix}$, discrete $Q$ from $\sigma_v$, $\sigma_u$ (Crassidis & Junkins).
+- **Gyro averaging:** `mekf.estimatorFsw` propagates with the average of the two samples bounding the interval. Using only the first sample leaves an error $\tfrac12\dot{\boldsymbol\omega}\Delta t$ that the filter mistakes for bias (it made a tumbling run inconsistent).
+- **Update** (valid star tracker): residual $2\,\mathrm{vec}(\hat{q}^{-1} \otimes q_{meas})$, $H = [I\;0]$, $R$ from `mekf.starTrackerCovariance`, Joseph form, then reset of $\hat{q}$ and $\hat{\boldsymbol\beta}$.
+- **Initialisation:** first valid star-tracker sample, $\hat{\boldsymbol\beta} = 0$, $P_0$ = `m.fsw.mekf.P0`.
+- **Consistency:** `scripts/study_mekf_monte_carlo.m` (20 runs × 600 s): average attitude NEES 2.81, 98% of samples inside the 95% band [2.02, 4.16]. The true initial bias of each run is drawn from the filter prior; with a fixed small bias the same filter gave NEES 0.65 because its prior was much wider than the truth.

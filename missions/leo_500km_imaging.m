@@ -104,6 +104,8 @@ m.actuators.thruster.minOnTime  = 0;                   % s, valve on-time step (
 
 %% Flight software
 m.fsw.rate = 10;                                       % Hz, main control loop
+m.fsw.mekf.P0 = diag([deg2rad(1)^2*ones(1, 3), ...    % attitude error variance [rad^2]
+                      deg2rad(1/3600)^2*ones(1, 3)]);  % gyro bias variance [(rad/s)^2]
 
 %% Simulation
 m.sim.dt       = 0.01;                                 % s, truth integration step

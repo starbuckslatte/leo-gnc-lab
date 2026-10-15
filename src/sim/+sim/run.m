@@ -20,8 +20,9 @@ function out = run(m, fsw)
 %   its sample time t and a flag new (= sampled since the previous FSW step):
 %     gyro.w, str.q / str.valid, mag.b, sun.s / sun.valid, gnss.fix
 %
-%   out: logs at the FSW rate (t, r, v, q, w, h, tau, meas, cmd), plus
-%   P (periods in ticks) and dt.
+%   out: logs at the FSW rate (t, r, v, q, w, h, tau, meas, cmd, gyroBias =
+%   true gyro bias), plus P (periods in ticks) and dt. If the FSW provides
+%   fsw.log(state) -> column vector, it is recorded in out.fsw.
 rng(m.sim.seed);
 dt = m.sim.dt;
 nTick = round(m.sim.duration / dt);
@@ -77,6 +78,7 @@ L.meas = struct('gyro', zeros(3, nLog), 'gyroT', zeros(1, nLog), ...
                 'str', zeros(4, nLog), 'strValid', false(1, nLog), 'strT', zeros(1, nLog), ...
                 'mag', zeros(3, nLog), 'sun', zeros(3, nLog), 'sunValid', false(1, nLog));
 L.cmd = struct('rw', zeros(nW, nLog), 'mtq', zeros(3, nLog), 'thruster', zeros(nT, nLog));
+L.gyroBias = zeros(3, nLog);
 iLog = 0;
 
 for k = 0:nTick
@@ -141,6 +143,12 @@ for k = 0:nTick
         L.meas.mag(:, iLog) = meas.mag.b;
         L.meas.sun(:, iLog) = meas.sun.s;   L.meas.sunValid(iLog) = meas.sun.valid;
         L.cmd.rw(:, iLog) = cmd.rw; L.cmd.mtq(:, iLog) = mtq; L.cmd.thruster(:, iLog) = cmd.thruster;
+        L.gyroBias(:, iLog) = S.gyro.bias;
+        if isfield(fsw, 'log')
+            y = fsw.log(fswState);
+            if iLog == 1, L.fsw = zeros(numel(y), nLog); end
+            L.fsw(:, iLog) = y;
+        end
     end
     if k == nTick, break; end
 
