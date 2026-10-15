@@ -97,7 +97,7 @@ EOP are passed as a struct `eop` with fields `dut1` [s], `xp`, `yp` [rad], `lod`
 
 - State $x = [\mathbf{r};\,\mathbf{v}]$ in ECI (J2000), SI units; time as seconds since a UTC Julian date `jd0`.
 - Gravity: `degree = 0` is two-body with EGM2008 GM $= 3.986004415\times10^{14}$ m³/s². `degree ≥ 2` uses Aerospace Toolbox `gravitysphericalharmonic` (EGM2008, degree = order), evaluated in ECEF and rotated back with `frames.fk5`.
-- Integrator: fixed-step classical RK4 (`orbit.rk4Step`). Against `ode113` (RelTol 1e-12) with EGM2008 degree 6 at 500 km, the position difference after one orbit is 0.3 mm (dt = 1 s), 0.7 mm (dt = 5 s) and 1.6 cm (dt = 10 s).
+- Integrator: fixed-step classical RK4 (`num.rk4Step`, shared with attitude). Against `ode113` (RelTol 1e-12) with EGM2008 degree 6 at 500 km, the position difference after one orbit is 0.3 mm (dt = 1 s), 0.7 mm (dt = 5 s) and 1.6 cm (dt = 10 s).
 - Cost: about 0.5–1 ms per acceleration evaluation, mostly inside `gravitysphericalharmonic`; one day at dt = 5 s with degree 6 takes about 20 s.
 
 ## Environment (`+env`)
@@ -123,3 +123,14 @@ All torques are in the body frame [N m]; `q` is the ECI→body quaternion.
 | `torque.magnetic` | $\boldsymbol{\tau} = \mathbf{m} \times \mathbf{B}_b$ |
 
 Aerodynamic and SRP torques use $\boldsymbol{\tau} = \mathbf{c}_p \times \mathbf{F}$ with the single `sc.cpOffset` (centre of pressure − CoM) from the mission file. Area does not change with attitude; a multi-plate model can replace this later.
+
+## Rigid-body attitude dynamics (`+attitude`)
+
+State $x = [q;\,\boldsymbol{\omega}]$: $q$ ECI→body (scalar-first), $\boldsymbol{\omega}$ body rate w.r.t. ECI in body [rad/s].
+
+$$
+\dot{q} = \tfrac12\,q \otimes \begin{bmatrix} 0 \ \boldsymbol{\omega} \end{bmatrix}, \qquad
+J\,\dot{\boldsymbol{\omega}} = \boldsymbol{\tau} - \boldsymbol{\omega} \times J\boldsymbol{\omega}
+$$
+
+`attitude.propagate` integrates with fixed-step RK4 (`num.rk4Step`) and renormalizes $q$ after each step. The torque is a function `tauFun(t, q, w)` evaluated at every RK4 stage, so `+torque` functions can be plugged in directly. Reaction-wheel momentum is not included yet (Phase 3).

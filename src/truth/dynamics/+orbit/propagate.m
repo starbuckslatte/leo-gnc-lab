@@ -10,6 +10,6 @@ X = zeros(6, n+1);
 X(:, 1) = x0(:);
 f = @(tt, x) orbit.derivative(tt, x, jd0, eop, degree);
 for k = 1:n
-    X(:, k+1) = orbit.rk4Step(f, t(k), X(:, k), dt);
+    X(:, k+1) = num.rk4Step(f, t(k), X(:, k), dt);
 end
 end

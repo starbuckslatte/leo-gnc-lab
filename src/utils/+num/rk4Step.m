@@ -1,5 +1,5 @@
 function x = rk4Step(f, t, x, dt)
-%ORBIT.RK4STEP One classical fourth-order Runge-Kutta step of xdot = f(t, x).
+%NUM.RK4STEP One classical fourth-order Runge-Kutta step of xdot = f(t, x).
 k1 = f(t,          x);
 k2 = f(t + dt/2,   x + dt/2*k1);
 k3 = f(t + dt/2,   x + dt/2*k2);
