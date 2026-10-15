@@ -62,6 +62,10 @@ m.sensors.starTracker.delaySteps = 0;                  % samples of latency (0 =
 
 m.sensors.magnetometer.rate  = 10;                     % Hz
 m.sensors.magnetometer.sigma = 100e-9;                 % T
+m.sensors.magnetometer.bias  = [0; 0; 0];              % T
+m.sensors.magnetometer.mtqCoupling  = zeros(3);        % T/(A m^2), MTQ field at sensor (0 = ideal)
+m.sensors.magnetometer.quantization = 0;               % T per LSB (0 = ideal)
+m.sensors.magnetometer.delaySteps   = 0;               % samples of latency (0 = ideal)
 
 m.sensors.sunSensor.rate  = 10;                        % Hz
 m.sensors.sunSensor.sigma = deg2rad(0.5);              % rad
@@ -81,6 +85,7 @@ m.actuators.rw.coulomb     = 0;                        % N m, Coulomb friction (
 m.actuators.rw.viscous     = 0;                        % N m s, viscous friction (0 = ideal; typ. 1e-6)
 
 m.actuators.mtq.maxDipole  = 15;                       % A m^2 per axis
+m.actuators.mtq.quantization = 0;                      % A m^2 per step (0 = ideal)
 
 %% Flight software
 m.fsw.rate = 10;                                       % Hz, main control loop
