@@ -99,3 +99,14 @@ EOP are passed as a struct `eop` with fields `dut1` [s], `xp`, `yp` [rad], `lod`
 - Gravity: `degree = 0` is two-body with EGM2008 GM $= 3.986004415\times10^{14}$ m³/s². `degree ≥ 2` uses Aerospace Toolbox `gravitysphericalharmonic` (EGM2008, degree = order), evaluated in ECEF and rotated back with `frames.fk5`.
 - Integrator: fixed-step classical RK4 (`orbit.rk4Step`). Against `ode113` (RelTol 1e-12) with EGM2008 degree 6 at 500 km, the position difference after one orbit is 0.3 mm (dt = 1 s), 0.7 mm (dt = 5 s) and 1.6 cm (dt = 10 s).
 - Cost: about 0.5–1 ms per acceleration evaluation, mostly inside `gravitysphericalharmonic`; one day at dt = 5 s with degree 6 takes about 20 s.
+
+## Environment (`+env`)
+
+All functions take an ECI position [m] and a UTC Julian date and return ECI vectors in SI units. Geodetic positions use WGS84 (`ecef2lla`) after `frames.fk5`.
+
+| Function | Model | Notes |
+|---|---|---|
+| `env.sunPosition` | JPL DE405 (`planetEphemeris`) | Geocentric, evaluated at TT |
+| `env.shadowFraction` | Conical Earth shadow, disk overlap | 1 sunlit, 0 umbra; Montenbruck & Gill 3.4.2 |
+| `env.magneticField` | IGRF-14 (`igrfmagm`) | Returned in tesla |
+| `env.atmosphereDensity` | NRLMSISE-00 (`atmosnrlmsise00`) | `sw` struct: `f107`, `f107a`, `ap` |
