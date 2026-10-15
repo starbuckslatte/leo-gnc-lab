@@ -62,10 +62,20 @@ A  = att.toDCM(q);                        % ECI -> body
 q2 = att.propagate(q, [0;0;0.01], 0.1);   % exact for constant rate
 ```
 
+Time and frame transformations:
+
+```matlab
+jd = timesys.jd([2026 10 15 3 25 7.5]);              % UTC Julian date
+[w, sow] = timesys.utcToGps(jd);                     % GPS week, seconds of week
+eop = struct('dut1', 0.08, 'xp', 0, 'yp', 0);        % EOP (rad for xp, yp)
+[rEci, vEci] = frames.ecefToEci(rEcef, vEcef, jd, eop);
+[A, q] = frames.eciToLvlh(rEci, vEci);               % ECI -> LVLH
+```
+
 ## Roadmap
 
 ### v1.0 — Core attitude GNC
-- [ ] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF/LVLH/body), time systems, unit tests ✅, local CI (buildtool + pre-push hook) ✅
+- [ ] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF IAU-76/FK5, LVLH) ✅, time systems (UTC/UT1/TT/GPS) ✅, unit tests ✅, local CI (buildtool + pre-push hook) ✅
 - [ ] **Phase 2 – Environment & dynamics:** orbit propagation (two-body, J2, spherical harmonics), atmosphere, magnetic field, Sun/eclipse, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques; disturbance-vs-altitude study
 - [ ] **Phase 3 – Sensors & actuators:** Farrenkopf gyro, star tracker, sun sensor, magnetometer, GNSS; reaction wheels (saturation, friction), magnetorquers, thrusters
 - [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo

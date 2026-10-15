@@ -60,3 +60,35 @@ $$
 ## Interoperability with Aerospace Toolbox
 
 `quatmultiply` and `quat2dcm` use the same layout and product but take 1x4 **row** vectors; `att.*` uses 4x1 **columns**. Pass `q'`. Checked by `QuaternionTest/aerospaceToolboxConsistency` when the toolbox is installed. Inside `src/fsw/` use `att.*` only.
+
+## Time systems (`+timesys`)
+
+| Scale | Relation |
+|---|---|
+| TAI | UTC + ΔAT (leap seconds, MATLAB `leapseconds`; 37 s since 2017-01-01) |
+| TT | TAI + 32.184 s |
+| UT1 | UTC + DUT1 (EOP) |
+| GPS | TAI − 19 s; full week number (no 1024 rollover), epoch 1980-01-06 |
+
+Julian dates are plain doubles, which resolve about 40 µs; this is the precision floor of every JD-based time. Sidereal time `timesys.gmst` uses the IAU-82 formula, the same as EGSE `iers_gmst96`.
+
+## ECI ↔ ECEF (`+frames`, IAU-76/FK5)
+
+Same model as B5G-AOCS-EGSE `ecef2eci_76fk5` (Vallado Sec. 3.7). ECI is J2000 (mean equator and equinox):
+
+$$
+\mathbf{r}_{ECI} = P\,N\,R\,W\,\mathbf{r}_{ECEF}, \qquad
+\mathbf{v}_{ECI} = P\,N\,R\left(W\,\mathbf{v}_{ECEF} + \boldsymbol{\omega}_\oplus \times W\,\mathbf{r}_{ECEF}\right)
+$$
+
+- $P$: IAU-76 precession, $N$: IAU-80 nutation (106 terms), both evaluated in TT
+- $R = \mathrm{ROT3}(-\mathrm{GAST})$, GAST from UT1 with the IAU-94 equation-of-equinoxes terms
+- $W = \mathrm{ROT1}(y_p)\,\mathrm{ROT2}(x_p)$ (polar motion)
+- $\omega_\oplus = 7.292115146706979\times10^{-5}\,(1 - \mathrm{LOD}/86400)$ rad/s
+- EOP celestial-pole offsets (dPsi, dEps) are not applied, as in the EGSE `fk5_76.N`
+
+EOP are passed as a struct `eop` with fields `dut1` [s], `xp`, `yp` [rad], `lod` [s]; missing fields default to 0.
+
+**Known difference from EGSE:** `rot_mtx.m` passes a Julian date to `omega_lunar`, which expects Julian centuries. This only changes the two small equation-of-equinoxes terms, by at most 0.0027″ (9 cm at 7000 km; measured 7e-10 rad = 3.5 mm on 2026-10-15). `frames.fk5` uses centuries of TT.
+
+**LVLH:** `frames.eciToLvlh` returns $A_{ECI\to LVLH}$ and the matching quaternion, the same as EGSE `PVi2Qi2l`.
