@@ -1,0 +1,18 @@
+#!/bin/sh
+# Local CI: block the push if the code check or any test fails.
+# Enable once per clone:  git config core.hooksPath .githooks
+# Bypass in an emergency: git push --no-verify
+#
+# Pass/fail is read from a marker file, not MATLAB's exit code: on this
+# machine MATLAB can crash during shutdown (exit 127) even after a clean run.
+echo "[pre-push] Running local MATLAB CI (buildtool)..."
+root=$(git rev-parse --show-toplevel)
+marker="$root/results/.build-ok"
+rm -f "$marker"
+matlab -batch "cd('$root'); buildtool; fclose(fopen('results/.build-ok', 'w'));"
+if [ ! -f "$marker" ]; then
+    echo "[pre-push] buildtool FAILED. Push aborted."
+    exit 1
+fi
+rm -f "$marker"
+echo "[pre-push] buildtool passed."

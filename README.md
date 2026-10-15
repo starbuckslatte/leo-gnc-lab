@@ -46,10 +46,18 @@ runAllTests           % run the full unit test suite
 demo_phase1_quaternion
 ```
 
+### Local CI
+
+`buildfile.m` defines the CI: a static code check (`check`) and the full test suite (`test`). Run it with `buildtool` in MATLAB. A versioned `pre-push` hook runs the same build before every `git push` and blocks the push on failure. Enable it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 Quaternion functions are called through their namespace, e.g.:
 
 ```matlab
-q  = att.fromAxisAngle([0;0;1], pi/2);   % scalar-last
+q  = att.fromAxisAngle([0;0;1], pi/2);   % scalar-first
 A  = att.toDCM(q);                        % ECI -> body
 q2 = att.propagate(q, [0;0;0.01], 0.1);   % exact for constant rate
 ```
@@ -57,7 +65,7 @@ q2 = att.propagate(q, [0;0;0.01], 0.1);   % exact for constant rate
 ## Roadmap
 
 ### v1.0 — Core attitude GNC
-- [ ] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF/LVLH/body), time systems, unit tests ✅, CI ✅
+- [ ] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF/LVLH/body), time systems, unit tests ✅, local CI (buildtool + pre-push hook) ✅
 - [ ] **Phase 2 – Environment & dynamics:** orbit propagation (two-body, J2, spherical harmonics), atmosphere, magnetic field, Sun/eclipse, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques; disturbance-vs-altitude study
 - [ ] **Phase 3 – Sensors & actuators:** Farrenkopf gyro, star tracker, sun sensor, magnetometer, GNSS; reaction wheels (saturation, friction), magnetorquers, thrusters
 - [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo
@@ -78,8 +86,8 @@ q2 = att.propagate(q, [0;0;0.01], 0.1);   % exact for constant rate
 | Item | Convention |
 |---|---|
 | Units | SI internally, angles in rad |
-| Quaternion | Scalar-last `[q1 q2 q3 q4]'`, `q4` scalar |
-| Product | Shuster: `A(q ⊗ p) = A(q) A(p)` |
+| Quaternion | Scalar-first `[qs q1 q2 q3]'` (same as B5G-AOCS-EGSE) |
+| Product | Hamilton: `Qa2c = Qa2b ⊗ Qb2c` |
 | Attitude matrix | `A(q)` maps reference (ECI) → body (passive) |
 | Angular rate | Body w.r.t. ECI, expressed in body |
 

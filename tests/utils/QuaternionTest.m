@@ -1,6 +1,7 @@
 classdef QuaternionTest < matlab.unittest.TestCase
     %QUATERNIONTEST Unit tests for the +att quaternion package.
-    %   Convention under test: scalar-last, Shuster product, passive DCM.
+    %   Convention under test: scalar-first, Hamilton product, passive DCM
+    %   (same as B5G-AOCS-EGSE QMul / FrameA2B / M2Q).
     %   Run with:  runtests('tests')   or   runAllTests
 
     properties (Constant)
@@ -45,6 +46,13 @@ classdef QuaternionTest < matlab.unittest.TestCase
             testCase.verifyError(@() att.normalize(zeros(4, 1)), 'att:normalize:zeroNorm');
         end
 
+        function hamiltonBasisProduct(testCase)
+            % Pins the product convention: Hamilton gives i (x) j = +k
+            % (Shuster would give -k). Must match EGSE QMul.
+            i = [0; 1; 0; 0]; j = [0; 0; 1; 0]; k = [0; 0; 0; 1];
+            testCase.verifyEqual(att.multiply(i, j), k, 'AbsTol', testCase.Tol);
+        end
+
         function skewMatchesCross(testCase)
             a = randn(3, 1); b = randn(3, 1);
             testCase.verifyEqual(att.skew(a)*b, cross(a, b), 'AbsTol', testCase.Tol);
@@ -54,12 +62,13 @@ classdef QuaternionTest < matlab.unittest.TestCase
     %% ---------------- DCM ----------------
     methods (Test)
         function compositionMatchesDcmProduct(testCase)
-            % Defining property of the Shuster product: A(q (x) p) = A(q) A(p)
+            % Left-to-right frame composition: Qa2c = Qa2b (x) Qb2c,
+            % so A(q (x) p) = A(p) A(q).
             for k = 1:testCase.NumRandom
                 q = QuaternionTest.randomQuat();
                 p = QuaternionTest.randomQuat();
                 testCase.verifyEqual(att.toDCM(att.multiply(q, p)), ...
-                    att.toDCM(q)*att.toDCM(p), 'AbsTol', 1e-12);
+                    att.toDCM(p)*att.toDCM(q), 'AbsTol', 1e-12);
             end
         end
 
@@ -84,7 +93,7 @@ classdef QuaternionTest < matlab.unittest.TestCase
                 q = QuaternionTest.randomQuat();
                 q2 = att.fromDCM(att.toDCM(q));
                 testCase.verifyLessThan(att.errorAngle(q, q2), 1e-10);
-                testCase.verifyGreaterThanOrEqual(q2(4), 0);
+                testCase.verifyGreaterThanOrEqual(q2(1), 0);
             end
         end
 
@@ -120,11 +129,11 @@ classdef QuaternionTest < matlab.unittest.TestCase
         end
 
         function propagateMatchesComposition(testCase)
-            % Constant rate: q(t+dt) = dq(w*dt) (x) q(t)
+            % Constant rate: q(t+dt) = q(t) (x) dq(w*dt)
             q0 = QuaternionTest.randomQuat();
             w  = [0.02; -0.05; 0.1];
             dt = 0.5;
-            expected = att.multiply(att.fromAxisAngle(w, norm(w)*dt), q0);
+            expected = att.multiply(q0, att.fromAxisAngle(w, norm(w)*dt));
             testCase.verifyEqual(att.propagate(q0, w, dt), expected, 'AbsTol', testCase.Tol);
         end
 
@@ -181,12 +190,9 @@ classdef QuaternionTest < matlab.unittest.TestCase
             for k = 1:20
                 q = QuaternionTest.randomQuat();
                 p = QuaternionTest.randomQuat();
-                % Same DCM after reordering components
-                testCase.verifyEqual(quat2dcm(att.toScalarFirst(q)), att.toDCM(q), ...
-                    'AbsTol', 1e-12);
-                % Hamilton product has reversed order: q (x)_Shuster p == p (x)_Hamilton q
-                r = att.fromScalarFirst(quatmultiply(att.toScalarFirst(p), att.toScalarFirst(q)));
-                testCase.verifyEqual(r, att.multiply(q, p), 'AbsTol', 1e-12);
+                % Same layout and product; toolbox uses 1x4 rows.
+                testCase.verifyEqual(quat2dcm(q'), att.toDCM(q), 'AbsTol', 1e-12);
+                testCase.verifyEqual(quatmultiply(q', p'), att.multiply(q, p)', 'AbsTol', 1e-12);
             end
         end
     end

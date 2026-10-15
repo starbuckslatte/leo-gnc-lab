@@ -21,3 +21,8 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# buildtool outputs
+results/test-results.xml
+.buildtool/
+results/.build-ok

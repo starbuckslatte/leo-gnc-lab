@@ -1,10 +1,9 @@
 function qdot = derivative(q, w)
-%ATT.DERIVATIVE Quaternion kinematics: qdot = 0.5 * Omega(w) * q.
+%ATT.DERIVATIVE Quaternion kinematics: qdot = 0.5 * q (x) [0; w].
 %   w: angular velocity of body w.r.t. reference, expressed in body [rad/s].
-%   Omega(w) = [ -[w x]  w ;
-%                 -w'    0 ]
+%   q: reference-to-body attitude, scalar-first.
 q = q(:); w = w(:);
-qv = q(1:3); q4 = q(4);
-qdot = 0.5*[-att.skew(w)*qv + q4*w;
-            -w'*qv];
+qs = q(1); qv = q(2:4);
+qdot = 0.5*[-dot(qv, w);
+            qs*w + cross(qv, w)];
 end

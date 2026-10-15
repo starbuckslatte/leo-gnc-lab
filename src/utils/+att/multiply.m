@@ -1,14 +1,13 @@
 function r = multiply(q, p)
-%ATT.MULTIPLY Quaternion product r = q (x) p, Shuster convention.
-%   Defined so that attitude matrices compose in the same order:
-%       att.toDCM(att.multiply(q, p)) == att.toDCM(q) * att.toDCM(p)
-%   i.e. p is applied first, then q.
-%
-%   NOTE: This differs from the Hamilton product used by quatmultiply
-%   (Aerospace Toolbox). See docs/conventions.md.
+%ATT.MULTIPLY Quaternion product r = q (x) p, Hamilton convention, scalar-first.
+%   Same formula as EGSE QMul and Aerospace Toolbox quatmultiply.
+%   Frame rotations compose left to right:
+%       Qa2c = att.multiply(Qa2b, Qb2c)
+%       att.toDCM(Qa2c) == att.toDCM(Qb2c) * att.toDCM(Qa2b)
+%   See docs/conventions.md.
 q = q(:); p = p(:);
-qv = q(1:3); q4 = q(4);
-pv = p(1:3); p4 = p(4);
-r = [q4*pv + p4*qv - cross(qv, pv);
-     q4*p4 - dot(qv, pv)];
+qs = q(1); qv = q(2:4);
+ps = p(1); pv = p(2:4);
+r = [qs*ps - dot(qv, pv);
+     qs*pv + ps*qv + cross(qv, pv)];
 end

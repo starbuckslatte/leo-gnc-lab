@@ -17,49 +17,46 @@ SI units internally (m, s, kg, N, T). Angles in radians. Degrees and arcseconds 
 
 ## Quaternions
 
-**Layout (scalar-last):**
+Same convention as B5G-AOCS-EGSE (`QMul`, `QInv`, `M2Q`, `FrameA2B`) and Aerospace Toolbox (`quatmultiply`, `quat2dcm`), so results can be compared without conversion.
+
+**Layout (scalar-first):**
 
 $$
-q = \begin{bmatrix} \mathbf{q}_v \\ q_4 \end{bmatrix}, \qquad
-\mathbf{q}_v = \hat{e}\sin\frac{\theta}{2}, \quad q_4 = \cos\frac{\theta}{2}
+q = \begin{bmatrix} q_s \\ \mathbf{q}_v \end{bmatrix}, \qquad
+q_s = \cos\frac{\theta}{2}, \quad \mathbf{q}_v = \hat{e}\sin\frac{\theta}{2}
 $$
 
-**Attitude matrix** (maps reference-frame vectors into the body frame, $\mathbf{v}_B = A(q)\,\mathbf{v}_I$):
+**Attitude matrix** (maps reference-frame vectors into the body frame, $\mathbf{v}_B = A(q)\,\mathbf{v}_I = q^{-1} \otimes \mathbf{v}_I \otimes q$):
 
 $$
-A(q) = \left(q_4^2 - \|\mathbf{q}_v\|^2\right) I_3 + 2\,\mathbf{q}_v\mathbf{q}_v^T - 2\,q_4\,[\mathbf{q}_v\times]
+A(q) = \left(q_s^2 - \|\mathbf{q}_v\|^2\right) I_3 + 2\,\mathbf{q}_v\mathbf{q}_v^T - 2\,q_s\,[\mathbf{q}_v\times]
 $$
 
-**Product (Shuster convention)**, chosen so that quaternions compose in the same order as attitude matrices:
+**Product (Hamilton convention):**
 
 $$
-q \otimes p = \begin{bmatrix} q_4\,\mathbf{p}_v + p_4\,\mathbf{q}_v - \mathbf{q}_v \times \mathbf{p}_v \\ q_4 p_4 - \mathbf{q}_v \cdot \mathbf{p}_v \end{bmatrix},
-\qquad A(q \otimes p) = A(q)\,A(p)
+q \otimes p = \begin{bmatrix} q_s p_s - \mathbf{q}_v \cdot \mathbf{p}_v \\ q_s\,\mathbf{p}_v + p_s\,\mathbf{q}_v + \mathbf{q}_v \times \mathbf{p}_v \end{bmatrix}
 $$
+
+Frame rotations compose left to right: $q_{a2c} = q_{a2b} \otimes q_{b2c}$, hence $A(q \otimes p) = A(p)\,A(q)$.
 
 **Kinematics** ($\boldsymbol{\omega}$ = body rate w.r.t. inertial, in body):
 
 $$
-\dot{q} = \tfrac{1}{2}\,\Omega(\boldsymbol{\omega})\,q, \qquad
-\Omega(\boldsymbol{\omega}) = \begin{bmatrix} -[\boldsymbol{\omega}\times] & \boldsymbol{\omega} \\ -\boldsymbol{\omega}^T & 0 \end{bmatrix},
-\qquad \dot{A} = -[\boldsymbol{\omega}\times]A
+\dot{q} = \tfrac{1}{2}\, q \otimes \begin{bmatrix} 0 \\ \boldsymbol{\omega} \end{bmatrix}, \qquad \dot{A} = -[\boldsymbol{\omega}\times]A
 $$
 
 **Discrete propagation** (exact for constant $\boldsymbol{\omega}$ over $\Delta t$):
 
 $$
-q_{k+1} = \bar{\Omega}\,q_k, \quad
-\bar{\Omega} = \begin{bmatrix} \cos\!\left(\tfrac{\|\boldsymbol{\omega}\|\Delta t}{2}\right) I_3 - [\boldsymbol{\psi}\times] & \boldsymbol{\psi} \\ -\boldsymbol{\psi}^T & \cos\!\left(\tfrac{\|\boldsymbol{\omega}\|\Delta t}{2}\right) \end{bmatrix}, \quad
+q_{k+1} = q_k \otimes \begin{bmatrix} \cos\!\left(\tfrac{\|\boldsymbol{\omega}\|\Delta t}{2}\right) \\ \boldsymbol{\psi} \end{bmatrix}, \quad
 \boldsymbol{\psi} = \sin\!\left(\tfrac{\|\boldsymbol{\omega}\|\Delta t}{2}\right)\frac{\boldsymbol{\omega}}{\|\boldsymbol{\omega}\|}
 $$
 
-**Attitude error** (used by the MEKF): $\delta q = q \otimes \hat{q}^{-1}$, with small-angle approximation $\delta\boldsymbol{\theta} \approx 2\,\delta\mathbf{q}_v$.
+**Sign:** `att.fromDCM` returns $q_s \ge 0$ (same as EGSE `M2Q`).
+
+**Attitude error:** `att.errorAngle` returns the total angle of $\delta q = q_A \otimes q_B^{-1}$ in rad. EGSE `QErrAng` instead returns the 3-axis small-angle vector $2\,\delta\mathbf{q}_v$ in arcsec.
 
 ## Interoperability with Aerospace Toolbox
 
-Aerospace Toolbox functions (`quat2dcm`, `quatmultiply`, …) use **scalar-first** row vectors and the **Hamilton** product.
-
-- Component order: convert with `att.toScalarFirst` / `att.fromScalarFirst`. After reordering, `quat2dcm` returns the same matrix as `att.toDCM`.
-- Multiplication order is reversed: `q ⊗ p` (Shuster) equals `quatmultiply(p, q)` (Hamilton, after reordering).
-
-Both facts are checked by `QuaternionTest/aerospaceToolboxConsistency`, which runs automatically when the toolbox is installed. Never call `quatmultiply` inside `src/fsw/`; use `att.multiply`.
+`quatmultiply` and `quat2dcm` use the same layout and product but take 1x4 **row** vectors; `att.*` uses 4x1 **columns**. Pass `q'`. Checked by `QuaternionTest/aerospaceToolboxConsistency` when the toolbox is installed. Inside `src/fsw/` use `att.*` only.

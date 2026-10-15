@@ -1,11 +1,11 @@
 function q = fromAxisAngle(axis, angle)
 %ATT.FROMAXISANGLE Quaternion for a frame rotation of ANGLE [rad] about AXIS.
-%   q = [e*sin(angle/2); cos(angle/2)], e = axis/|axis|
+%   q = [cos(angle/2); e*sin(angle/2)], e = axis/|axis|
 axis = axis(:);
 nrm = norm(axis);
 if nrm < eps
     error('att:fromAxisAngle:zeroAxis', 'Rotation axis must be non-zero.');
 end
 e = axis / nrm;
-q = [e*sin(angle/2); cos(angle/2)];
+q = [cos(angle/2); e*sin(angle/2)];
 end
