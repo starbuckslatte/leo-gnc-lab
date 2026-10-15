@@ -145,6 +145,9 @@ Sensors with internal state use `[meas, state] = sensors.<name>(truth, state, p,
 | `sensors.starTracker` | $q_{meas} = q \otimes \delta q$, small-angle noise $\sigma_{cross}$ normal to the boresight and $\sigma_{roll}$ about it; invalid inside the Sun and Earth-limb exclusion cones |
 | `sensors.magnetometer` | $\tilde{\mathbf{B}} = A(q)\mathbf{B} + \mathbf{b} + K\,\mathbf{m}_{MTQ} + \sigma\mathbf{N}$; $K$ (`mtqCoupling`) is the MTQ field seen by the sensor |
 | `actuators.mtqDipole` | Each coil limited to ±`maxDipole` independently; optional quantization. Torque via `torque.magnetic` |
+| `sensors.sunSensor` | Body-frame unit Sun vector, small-angle noise $\sigma$ on each axis normal to it; invalid outside the FOV cone or in umbra. No Earth albedo |
+| `sensors.gnss` | Position/velocity in **ECEF** with per-axis $\sigma$, GPS week and seconds-of-week time tag; FSW converts to ECI |
+| `actuators.thruster` | Push-only thrusters, $\mathbf{F} = \sum \mathbf{d}_i f_i$, $\boldsymbol\tau = \sum \mathbf{r}_i \times \mathbf{d}_i f_i$; optional on-time step (minimum impulse bit). Thrust is not yet fed into orbit propagation |
 | `actuators.rwConfig` | Spin-axis matrix $G$; pyramid (4 wheels, azimuth 45°+k·90°, `cantAngle` from +z) or orthogonal |
 | `actuators.rwTorque` | Torque limit, momentum (speed) limit, optional Coulomb + viscous friction |
 

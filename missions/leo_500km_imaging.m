@@ -68,11 +68,15 @@ m.sensors.magnetometer.quantization = 0;               % T per LSB (0 = ideal)
 m.sensors.magnetometer.delaySteps   = 0;               % samples of latency (0 = ideal)
 
 m.sensors.sunSensor.rate  = 10;                        % Hz
-m.sensors.sunSensor.sigma = deg2rad(0.5);              % rad
+m.sensors.sunSensor.sigma = deg2rad(0.5);              % rad, per axis normal to the Sun line
+m.sensors.sunSensor.fovHalf   = deg2rad(60);           % rad, field-of-view half-angle
+m.sensors.sunSensor.boresight = [0; 0; -1];            % body frame
+m.sensors.sunSensor.delaySteps = 0;                    % samples of latency (0 = ideal)
 
 m.sensors.gnss.rate     = 1;                           % Hz
 m.sensors.gnss.sigmaPos = 5;                           % m
 m.sensors.gnss.sigmaVel = 0.05;                        % m/s
+m.sensors.gnss.delaySteps = 0;                         % samples of latency (0 = ideal)
 
 %% Actuators
 m.actuators.rw.count       = 4;
@@ -86,6 +90,17 @@ m.actuators.rw.viscous     = 0;                        % N m s, viscous friction
 
 m.actuators.mtq.maxDipole  = 15;                       % A m^2 per axis
 m.actuators.mtq.quantization = 0;                      % A m^2 per step (0 = ideal)
+
+% Thrusters: 4 x 0.1 N on the -x face, canted 10 deg outward, firing toward +x
+c = cosd(10); s10 = sind(10);
+m.actuators.thruster.positions  = [-0.5 -0.5 -0.5 -0.5;
+                                    0.3 -0.3  0.3 -0.3;
+                                    0.3  0.3 -0.3 -0.3];   % m, from CoM
+m.actuators.thruster.directions = [c c c c;
+                                   -s10 s10 -s10 s10;
+                                    0 0 0 0];              % unit force on the spacecraft
+m.actuators.thruster.maxThrust  = 0.1;                 % N
+m.actuators.thruster.minOnTime  = 0;                   % s, valve on-time step (0 = ideal)
 
 %% Flight software
 m.fsw.rate = 10;                                       % Hz, main control loop

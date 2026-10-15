@@ -58,7 +58,7 @@ classdef SensorTest < matlab.unittest.TestCase
         function delayReturnsOldSample(testCase)
             % N-sample delay: output k equals input k-N. Models the sensor
             % latency that FSW must compensate (e.g. star tracker).
-            buf = repmat(0, 1, 3);
+            buf = zeros(1, 3);
             out = zeros(1, 10);
             for k = 1:10
                 [out(k), buf] = sensors.delay(k, buf);

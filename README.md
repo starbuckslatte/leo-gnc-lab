@@ -2,7 +2,7 @@
 
 A modular MATLAB/Simulink sandbox for spacecraft **Guidance, Navigation & Control (GNC)** in **LEO and VLEO**, built step by step from first principles: environment and dynamics, sensor models, attitude and orbit estimation, closed-loop control, mode management with FDIR, and optical navigation.
 
-> **Status:** Phase 2 (environment & dynamics) complete.
+> **Status:** Phase 3 (sensors & actuators) complete.
 
 ## Design principles
 
@@ -77,7 +77,7 @@ eop = struct('dut1', 0.08, 'xp', 0, 'yp', 0);        % EOP (rad for xp, yp)
 ### v1.0 — Core attitude GNC
 - [x] **Phase 1 – Foundations:** quaternion utilities ✅, frame transformations (ECI/ECEF IAU-76/FK5, LVLH) ✅, time systems (UTC/UT1/TT/GPS) ✅, unit tests ✅, buildtool verification ✅
 - [x] **Phase 2 – Environment & dynamics:** rigid-body attitude dynamics (Euler, RK4) ✅, orbit propagation (two-body, EGM2008 spherical harmonics, RK4) ✅, atmosphere (NRLMSISE-00) ✅, magnetic field (IGRF-14) ✅, Sun/eclipse (DE405, conical shadow) ✅, gravity-gradient / aerodynamic / SRP / magnetic disturbance torques ✅; disturbance-vs-altitude study ✅ (`scripts/study_disturbance_vs_altitude.m`, [figure](results/disturbance_vs_altitude.png))
-- [ ] **Phase 3 – Sensors & actuators:** Farrenkopf gyro ✅, star tracker ✅, sun sensor, magnetometer ✅, GNSS; reaction wheels (saturation, friction, body coupling) ✅, magnetorquers ✅, thrusters; switchable delay / quantization ✅
+- [x] **Phase 3 – Sensors & actuators:** Farrenkopf gyro ✅, star tracker ✅, sun sensor ✅, magnetometer ✅, GNSS ✅; reaction wheels (saturation, friction, body coupling) ✅, magnetorquers ✅, thrusters ✅; switchable delay / quantization ✅
 - [ ] **Phase 4 – Attitude determination:** MEKF with ±3σ consistency, NEES, Monte Carlo
 - [ ] **Phase 5 – Attitude guidance & control:** B-dot detumble, quaternion feedback, nadir / target pointing, large-angle slews, momentum unloading
 
