@@ -49,6 +49,8 @@ m.sensors.gyro.rate        = 10;                       % Hz
 m.sensors.gyro.sigmaV      = sqrt(10)*1e-7;            % rad/s^(1/2), angle random walk
 m.sensors.gyro.sigmaU      = sqrt(10)*1e-10;           % rad/s^(3/2), rate random walk
 m.sensors.gyro.initialBias = deg2rad(0.1/3600)*[1; 1; 1];  % rad/s (0.1 deg/h)
+m.sensors.gyro.quantization = 0;                       % rad/s per LSB (0 = ideal)
+m.sensors.gyro.delaySteps   = 0;                       % samples of latency (0 = ideal)
 
 m.sensors.starTracker.rate       = 2;                  % Hz
 m.sensors.starTracker.sigmaCross = deg2rad(6/3600);    % rad (6 arcsec, 1-sigma)
@@ -56,6 +58,7 @@ m.sensors.starTracker.sigmaRoll  = deg2rad(40/3600);   % rad (40 arcsec, 1-sigma
 m.sensors.starTracker.boresight  = [0; 1; 0];          % body frame
 m.sensors.starTracker.sunExcl    = deg2rad(30);        % rad, sun exclusion half-angle
 m.sensors.starTracker.earthExcl  = deg2rad(20);        % rad, Earth-limb exclusion
+m.sensors.starTracker.delaySteps = 0;                  % samples of latency (0 = ideal)
 
 m.sensors.magnetometer.rate  = 10;                     % Hz
 m.sensors.magnetometer.sigma = 100e-9;                 % T
@@ -72,6 +75,10 @@ m.actuators.rw.count       = 4;
 m.actuators.rw.config      = 'pyramid';
 m.actuators.rw.maxTorque   = 0.02;                     % N m
 m.actuators.rw.maxMomentum = 0.5;                      % N m s
+m.actuators.rw.cantAngle   = deg2rad(54.7356);         % rad, spin axis from body +z (equal 3-axis capacity)
+m.actuators.rw.wheelInertia = 1e-3;                    % kg m^2 (sets wheel speed for friction)
+m.actuators.rw.coulomb     = 0;                        % N m, Coulomb friction (0 = ideal; typ. 1e-4)
+m.actuators.rw.viscous     = 0;                        % N m s, viscous friction (0 = ideal; typ. 1e-6)
 
 m.actuators.mtq.maxDipole  = 15;                       % A m^2 per axis
 

@@ -134,3 +134,24 @@ J\,\dot{\boldsymbol{\omega}} = \boldsymbol{\tau} - \boldsymbol{\omega} \times J\
 $$
 
 `attitude.propagate` integrates with fixed-step RK4 (`num.rk4Step`) and renormalizes $q$ after each step. The torque is a function `tauFun(t, q, w)` evaluated at every RK4 stage, so `+torque` functions can be plugged in directly. Reaction-wheel momentum is not included yet (Phase 3).
+
+## Sensors (`+sensors`) and actuators (`+actuators`)
+
+Sensors with internal state use `[meas, state] = sensors.<name>(truth, state, p, ...)`, with `state = sensors.<name>Init(p)`. Random numbers come from the global stream; fix it with `rng(m.sim.seed)`.
+
+| Function | Model |
+|---|---|
+| `sensors.gyro` | Farrenkopf: $\tilde{\boldsymbol\omega}_{k+1} = \boldsymbol\omega_{k+1} + \tfrac12(\boldsymbol\beta_k + \boldsymbol\beta_{k+1}) + \sqrt{\sigma_v^2/\Delta t + \sigma_u^2\Delta t/12}\,\mathbf{N}_v$, $\boldsymbol\beta_{k+1} = \boldsymbol\beta_k + \sigma_u\sqrt{\Delta t}\,\mathbf{N}_u$ |
+| `sensors.starTracker` | $q_{meas} = q \otimes \delta q$, small-angle noise $\sigma_{cross}$ normal to the boresight and $\sigma_{roll}$ about it; invalid inside the Sun and Earth-limb exclusion cones |
+| `actuators.rwConfig` | Spin-axis matrix $G$; pyramid (4 wheels, azimuth 45°+k·90°, `cantAngle` from +z) or orthogonal |
+| `actuators.rwTorque` | Torque limit, momentum (speed) limit, optional Coulomb + viscous friction |
+
+**Hardware effects** (default off, so the baseline is ideal): `delaySteps` (output from N samples earlier, `sensors.delay`) and `quantization` (LSB, `sensors.quantize`).
+
+**Wheel coupling:** with wheels, `attitude.propagate(..., rw)` uses state $[q;\,\boldsymbol\omega;\,\mathbf{h}]$ and
+
+$$
+J\dot{\boldsymbol\omega} = \boldsymbol\tau - G\dot{\mathbf{h}} - \boldsymbol\omega \times (J\boldsymbol\omega + G\mathbf{h}), \qquad \dot{\mathbf{h}} = \text{actuators.rwTorque}(\cdot)
+$$
+
+$J$ is the whole-spacecraft inertia including the wheels. Friction uses wheel speed $h/I_w$, neglecting the body-rate contribution.
